@@ -48,7 +48,13 @@ export default function Tunnel() {
     if (isConnected) {
       setIsConnected(false);
       localStorage.setItem('s-tunnel-active', 'false');
-      // Refresh IP to show real one
+      console.log("%c[S-Tunnel Server] Disconnected", "color: #ef4444; font-weight: bold;");
+      
+      // Notify Service Worker (The "Server")
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: 'TUNNEL_STATE', active: false });
+      }
+
       fetch('https://ipapi.co/json/')
         .then(res => res.json())
         .then(data => setIpData({ ip: data.ip, location: `${data.city}, ${data.country_name}` }));
@@ -62,11 +68,20 @@ export default function Tunnel() {
         localStorage.setItem('s-tunnel-active', 'true');
         localStorage.setItem('s-tunnel-server-id', selectedServer.id);
         
-        // Save the actual proxy prefix
         const proxyPrefix = config.mode === 'custom' ? config.server : selectedServer.url;
         localStorage.setItem('s-tunnel-proxy-url', proxyPrefix);
         
-        // Mock the masked IP for the UI (real masking happens in Browser)
+        console.log(`%c[S-Tunnel Server] Connection Success! Target: ${config.mode === 'custom' ? config.server : selectedServer.name}`, "color: #10b981; font-weight: bold;");
+        
+        // Notify Service Worker (The "Server")
+        if (navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({ 
+            type: 'TUNNEL_STATE', 
+            active: true, 
+            proxyUrl: proxyPrefix 
+          });
+        }
+
         setIpData({ ip: '104.21.75.122', location: 'Frankfurt, DE' });
       }, 1500);
     }
@@ -124,12 +139,12 @@ export default function Tunnel() {
               }}>
                 {isConnected ? <ShieldCheck color="#10b981" /> : <Shield color="#3b82f6" />}
               </div>
-              <div>
-                <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>S-Tunnel Client</h2>
-                <p style={{ margin: 0, fontSize: '12px', color: '#94a3b8' }}>
-                  {isConnected ? `Masked via ${config.mode === 'custom' ? 'Custom Server' : selectedServer.name}` : 'Unprotected Connection'}
-                </p>
-              </div>
+      <div>
+        <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>S-Tunnel Server</h2>
+        <p style={{ margin: 0, fontSize: '12px', color: '#94a3b8' }}>
+          {isConnected ? `Masked via ${config.mode === 'custom' ? 'Custom Server' : selectedServer.name}` : 'Unprotected Connection'}
+        </p>
+      </div>
             </div>
 
             {/* Main Connection Card */}

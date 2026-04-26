@@ -8,3 +8,12 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <App />
   </React.StrictMode>,
 )
+
+// Register S-Tunnel Server (Service Worker)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('%c[S-Tunnel Server] Registered Successfully', 'color: #3b82f6; font-weight: bold;'))
+      .catch(err => console.log('[S-Tunnel Server] Registration Failed:', err));
+  });
+}
