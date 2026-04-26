@@ -12,11 +12,26 @@ export default function Browser() {
     if (!target.startsWith('http')) target = 'https://' + target;
     
     const tunnelActive = localStorage.getItem('s-tunnel-active') === 'true';
+    const tunnelMode = localStorage.getItem('stunnel-mode');
+    const customServer = localStorage.getItem('stunnel-server');
     
     if (tunnelActive || isProxy) {
-      // Using a more robust proxy method for the "Tunnel" feel
-      // Google Translate acts as a great free web proxy
-      const proxyUrl = `https://translate.google.com/translate?sl=auto&tl=en&u=${encodeURIComponent(target)}`;
+      let proxyUrl;
+      
+      if (tunnelMode === 'custom' && customServer) {
+        // If it's a custom server, we assume it's a web proxy instance that takes the URL as a path or param
+        // We'll append the target to the custom server URL
+        proxyUrl = customServer.endsWith('/') ? `${customServer}${target}` : `${customServer}/${target}`;
+      } else {
+        // Improved default proxy: Use a more robust unblocker service
+        // We'll use a more stealthy one or fallback to a different unblocker logic
+        // Note: Public instances change, so we'll use a reliable fallback
+        proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`;
+        // Actually, for full site rendering with JS (like iplocation.net), 
+        // we'll use a known web-unblocker instance
+        proxyUrl = `https://shuttle.rip/main/${target}`;
+      }
+      
       setUrl(proxyUrl);
     } else {
       setUrl(target);
