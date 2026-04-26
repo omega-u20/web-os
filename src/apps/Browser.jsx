@@ -5,6 +5,13 @@ export default function Browser() {
   const [url, setUrl] = useState('https://www.google.com/search?igu=1');
   const [inputUrl, setInputUrl] = useState('https://google.com');
   const [isProxy, setIsProxy] = useState(localStorage.getItem('s-tunnel-active') === 'true');
+  const [engine, setEngine] = useState('stealth'); // 'standard' | 'stealth' | 'ultra'
+
+  const engines = {
+    standard: 'https://shuttle.rip/main/',
+    stealth: 'https://nebula.rip/main/',
+    ultra: 'https://interstellar.rip/main/',
+  };
 
   const handleNavigate = (e) => {
     e.preventDefault();
@@ -12,24 +19,18 @@ export default function Browser() {
     if (!target.startsWith('http')) target = 'https://' + target;
     
     const tunnelActive = localStorage.getItem('s-tunnel-active') === 'true';
-    const tunnelMode = localStorage.getItem('stunnel-mode');
-    const customServer = localStorage.getItem('stunnel-server');
+    const proxyBase = localStorage.getItem('s-tunnel-proxy-url');
     
     if (tunnelActive || isProxy) {
       let proxyUrl;
       
-      if (tunnelMode === 'custom' && customServer) {
-        // If it's a custom server, we assume it's a web proxy instance that takes the URL as a path or param
-        // We'll append the target to the custom server URL
-        proxyUrl = customServer.endsWith('/') ? `${customServer}${target}` : `${customServer}/${target}`;
+      if (proxyBase) {
+        // Use custom server if set
+        proxyUrl = proxyBase.endsWith('/') ? `${proxyBase}${target}` : `${proxyBase}/${target}`;
       } else {
-        // Improved default proxy: Use a more robust unblocker service
-        // We'll use a more stealthy one or fallback to a different unblocker logic
-        // Note: Public instances change, so we'll use a reliable fallback
-        proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`;
-        // Actually, for full site rendering with JS (like iplocation.net), 
-        // we'll use a known web-unblocker instance
-        proxyUrl = `https://shuttle.rip/main/${target}`;
+        // Use the selected high-stealth engine
+        const base = engines[engine] || engines.stealth;
+        proxyUrl = `${base}${target}`;
       }
       
       setUrl(proxyUrl);
@@ -79,7 +80,25 @@ export default function Browser() {
           </div>
         </form>
 
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <select 
+            value={engine}
+            onChange={(e) => setEngine(e.target.value)}
+            style={{ 
+              fontSize: '11px', 
+              padding: '4px 8px', 
+              borderRadius: '6px', 
+              border: '1px solid #ddd', 
+              outline: 'none',
+              background: '#fff',
+              color: '#475569'
+            }}
+          >
+            <option value="standard">Standard Engine</option>
+            <option value="stealth">Stealth Node</option>
+            <option value="ultra">Ultra Unblocker</option>
+          </select>
+
           <button 
             onClick={() => setIsProxy(!isProxy)}
             style={{

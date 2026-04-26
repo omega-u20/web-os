@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Shield, ShieldCheck, Globe, Zap, Server, Lock, AlertCircle, RefreshCw } from 'lucide-react';
 
 const SERVERS = [
-  { id: 'us-west', name: 'US West (California)', ping: '45ms', load: '32%', icon: '🇺🇸' },
-  { id: 'eu-central', name: 'Europe Central (Frankfurt)', ping: '120ms', load: '12%', icon: '🇩🇪' },
-  { id: 'asia-east', name: 'Asia East (Tokyo)', ping: '210ms', load: '88%', icon: '🇯🇵' },
-  { id: 'free-proxy', name: 'S-Tunnel Public Node', ping: '85ms', load: '45%', icon: '🛡️' },
+  { id: 'shuttle', name: 'Shuttle Node (Fast)', ping: '42ms', load: '12%', icon: '🚀', url: 'https://shuttle.rip/main/' },
+  { id: 'nebula', name: 'Nebula Edge (Stealth)', ping: '88ms', load: '45%', icon: '🌌', url: 'https://nebula.rip/main/' },
+  { id: 'interstellar', name: 'Interstellar (Global)', ping: '120ms', load: '22%', icon: '✨', url: 'https://interstellar.rip/main/' },
+  { id: 'custom', name: 'Custom Tunnel Node', ping: 'N/A', load: 'N/A', icon: '🛡️', url: '' },
 ];
 
 export default function Tunnel() {
@@ -48,13 +48,26 @@ export default function Tunnel() {
     if (isConnected) {
       setIsConnected(false);
       localStorage.setItem('s-tunnel-active', 'false');
+      // Refresh IP to show real one
+      fetch('https://ipapi.co/json/')
+        .then(res => res.json())
+        .then(data => setIpData({ ip: data.ip, location: `${data.city}, ${data.country_name}` }));
     } else {
       setIsConnecting(true);
+      setIpData({ ip: 'Verifying...', location: 'Securing Connection...' });
+      
       setTimeout(() => {
         setIsConnecting(false);
         setIsConnected(true);
         localStorage.setItem('s-tunnel-active', 'true');
         localStorage.setItem('s-tunnel-server-id', selectedServer.id);
+        
+        // Save the actual proxy prefix
+        const proxyPrefix = config.mode === 'custom' ? config.server : selectedServer.url;
+        localStorage.setItem('s-tunnel-proxy-url', proxyPrefix);
+        
+        // Mock the masked IP for the UI (real masking happens in Browser)
+        setIpData({ ip: '104.21.75.122', location: 'Frankfurt, DE' });
       }, 1500);
     }
   };
