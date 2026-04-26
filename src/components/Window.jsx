@@ -6,13 +6,15 @@ import Terminal from '../apps/Terminal';
 import Settings from '../apps/Settings';
 import Files from '../apps/Files';
 import About from '../apps/About';
+import Tunnel from '../apps/Tunnel';
 
 const APP_COMPONENTS = {
   browser: Browser,
   terminal: Terminal,
   settings: Settings,
   files: Files,
-  about: About
+  about: About,
+  tunnel: Tunnel
 };
 
 export default function Window({ app, isActive, onClose, onMinimize, onMaximize, onFocus }) {

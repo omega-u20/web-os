@@ -11,7 +11,8 @@ import {
   Folder, 
   Info,
   Code,
-  Monitor
+  Monitor,
+  Shield
 } from 'lucide-react';
 import { useLongPress } from './hooks/useLongPress';
 
@@ -38,7 +39,8 @@ function DesktopIcon({ app, onOpen, onContextMenu }) {
 
 // App Manifest
 const APP_TEMPLATES = {
-  browser: { id: 'browser', name: 'Proxy Browser', icon: Globe, color: '#3b82f6' },
+  browser: { id: 'browser', name: 'Web Browser', icon: Globe, color: '#3b82f6' },
+  tunnel: { id: 'tunnel', name: 'S-Tunnel', icon: Shield, color: '#10b981' },
   terminal: { id: 'terminal', name: 'Terminal', icon: TerminalIcon, color: '#10b981' },
   files: { id: 'files', name: 'File Explorer', icon: Folder, color: '#f59e0b' },
   settings: { id: 'settings', name: 'Settings', icon: SettingsIcon, color: '#6366f1' },

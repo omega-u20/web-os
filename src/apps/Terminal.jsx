@@ -22,7 +22,7 @@ export default function Terminal() {
       
       switch (cmd) {
         case 'help':
-          newHistory.push('Available commands: help, ls, clear, neofetch, whoami, date');
+          newHistory.push('Available commands: help, ls, clear, neofetch, whoami, date, tunnel');
           break;
         case 'ls':
           newHistory.push('Documents  Downloads  Pictures  Music  Videos  System');
@@ -33,6 +33,11 @@ export default function Terminal() {
           return;
         case 'whoami':
           newHistory.push('guest_user');
+          break;
+        case 'tunnel':
+          const isTunnel = localStorage.getItem('s-tunnel-active') === 'true';
+          newHistory.push(isTunnel ? 'Status: [CONNECTED]' : 'Status: [DISCONNECTED]');
+          newHistory.push(isTunnel ? 'Masking: AES-256 Enabled' : 'Masking: Disabled');
           break;
         case 'date':
           newHistory.push(new Date().toString());

@@ -4,22 +4,20 @@ import { ChevronLeft, ChevronRight, RotateCw, Globe, Shield, ExternalLink } from
 export default function Browser() {
   const [url, setUrl] = useState('https://www.google.com/search?igu=1');
   const [inputUrl, setInputUrl] = useState('https://google.com');
-  const [isProxy, setIsProxy] = useState(false);
+  const [isProxy, setIsProxy] = useState(localStorage.getItem('s-tunnel-active') === 'true');
 
   const handleNavigate = (e) => {
     e.preventDefault();
     let target = inputUrl;
     if (!target.startsWith('http')) target = 'https://' + target;
     
-    if (isProxy) {
-      // Use a public proxy service if possible, or just a known bypass
-      // Example: Using a public proxy URL (Disclaimer: these change often)
-      setUrl(`https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`); 
-      // Note: AllOrigins only returns raw content, doesn't really 'browse'.
-      // For a better experience, we'll use Google's IGU or just tell them about the limitation
-      alert("Proxy mode is experimental. Using Direct Iframe instead.");
-      setIsProxy(false);
-      setUrl(target);
+    const tunnelActive = localStorage.getItem('s-tunnel-active') === 'true';
+    
+    if (tunnelActive || isProxy) {
+      // Using a more robust proxy method for the "Tunnel" feel
+      // Google Translate acts as a great free web proxy
+      const proxyUrl = `https://translate.google.com/translate?sl=auto&tl=en&u=${encodeURIComponent(target)}`;
+      setUrl(proxyUrl);
     } else {
       setUrl(target);
     }
@@ -73,15 +71,19 @@ export default function Browser() {
               padding: '4px 12px',
               borderRadius: '6px',
               border: 'none',
-              background: isProxy ? '#10b981' : '#e2e8f0',
-              color: isProxy ? 'white' : '#475569',
+              background: (isProxy || localStorage.getItem('s-tunnel-active') === 'true') ? '#10b981' : '#e2e8f0',
+              color: (isProxy || localStorage.getItem('s-tunnel-active') === 'true') ? 'white' : '#475569',
               fontSize: '11px',
               fontWeight: 600,
               cursor: 'pointer',
-              transition: '0.2s'
+              transition: '0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
             }}
           >
-            {isProxy ? 'PROXY ON' : 'DIRECT'}
+            {(isProxy || localStorage.getItem('s-tunnel-active') === 'true') ? <Shield size={12} /> : null}
+            {(isProxy || localStorage.getItem('s-tunnel-active') === 'true') ? 'TUNNEL ON' : 'DIRECT'}
           </button>
           <a href={url} target="_blank" rel="noreferrer" style={{ color: '#666' }}>
             <ExternalLink size={18} />
