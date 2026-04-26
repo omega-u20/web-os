@@ -24,11 +24,20 @@ self.addEventListener('message', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   
-  // Only proxy external requests if tunnel is active
-  if (tunnelActive && !url.origin.includes(location.origin)) {
-    console.log(`[Tunnel Server] Proxying request: ${url.href}`);
+  // 1. Never proxy internal assets or the OS itself
+  if (url.origin.includes(location.origin)) return;
+
+  // 2. Never proxy the proxy engines themselves (avoids infinite OS recursion)
+  const isProxyNode = url.hostname.includes('shuttle.rip') || 
+                      url.hostname.includes('nebula.rip') || 
+                      url.hostname.includes('interstellar.rip');
+  
+  if (isProxyNode) return;
+
+  // 3. Only proxy external requests if tunnel is active
+  if (tunnelActive && proxyUrl) {
+    console.log(`[Tunnel Server] Routing: ${url.href}`);
     
-    // Construct the proxied URL
     const finalProxyUrl = proxyUrl.endsWith('/') ? `${proxyUrl}${url.href}` : `${proxyUrl}/${url.href}`;
     
     event.respondWith(
@@ -37,8 +46,8 @@ self.addEventListener('fetch', (event) => {
         headers: event.request.headers,
         mode: 'cors'
       }).catch(err => {
-        console.error('[Tunnel Server] Proxy Error:', err);
-        return fetch(event.request); // Fallback to direct if proxy fails
+        console.error('[Tunnel Server] Routing Error:', err);
+        return fetch(event.request); 
       })
     );
   }
