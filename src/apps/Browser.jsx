@@ -67,8 +67,11 @@ export default function Browser() {
     const needsProxy = finalTarget.includes('duckduckgo.com') || finalTarget.includes('brave.com') || finalTarget.includes('google.com');
 
     if (tunnelActive || needsProxy) {
-      const base = proxyBase || engines[engine] || engines.stealth;
-      proxyUrl = base.endsWith('/') ? `${base}${finalTarget}` : `${base}${finalTarget}`;
+      const base = (tunnelActive && proxyBase) ? proxyBase : (engines[engine] || engines.stealth);
+      
+      // We must encodeURIComponent the finalTarget so the backend proxy receives the full URL
+      // including all its query params in req.query.url, otherwise it splits at '&'
+      proxyUrl = base.endsWith('=') ? `${base}${encodeURIComponent(finalTarget)}` : `${base}${finalTarget}`;
     } else {
       proxyUrl = finalTarget;
     }
