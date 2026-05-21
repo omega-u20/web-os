@@ -18,14 +18,24 @@ export default function Browser() {
   const [historyIndex, setHistoryIndex] = useState(0);
   const iframeRef = useRef(null);
 
-  // Keep tunnel state in sync
   useEffect(() => {
     const checkTunnel = () => {
       const active = localStorage.getItem('s-tunnel-active') === 'true';
       if (active !== isTunnelActive) setIsTunnelActive(active);
     };
     const interval = setInterval(checkTunnel, 1000);
-    return () => clearInterval(interval);
+    
+    const handleMessage = (e) => {
+      if (e.data && e.data.type === 'PROXY_NAVIGATE') {
+        setInputUrl(e.data.url);
+      }
+    };
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('message', handleMessage);
+    };
   }, [isTunnelActive]);
 
   const engines = {
