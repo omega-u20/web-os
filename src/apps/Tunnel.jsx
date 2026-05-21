@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Shield, ShieldCheck, Globe, Zap, Server, Lock, AlertCircle, RefreshCw } from 'lucide-react';
 
 const SERVERS = [
-  { id: 'shuttle', name: 'Shuttle Node (Fast)', ping: '42ms', load: '12%', icon: '🚀', url: 'https://shuttle.rip/main/' },
-  { id: 'nebula', name: 'Nebula Edge (Stealth)', ping: '88ms', load: '45%', icon: '🌌', url: 'https://nebula.rip/main/' },
-  { id: 'interstellar', name: 'Interstellar (Global)', ping: '120ms', load: '22%', icon: '✨', url: 'https://interstellar.rip/main/' },
+  { id: 'shuttle', name: 'Shuttle Node (Fast)', ping: '42ms', load: '12%', icon: '🚀', url: '/api/proxy?url=' },
+  { id: 'nebula', name: 'Nebula Edge (Stealth)', ping: '88ms', load: '45%', icon: '🌌', url: '/api/proxy?url=' },
+  { id: 'interstellar', name: 'Interstellar (Global)', ping: '120ms', load: '22%', icon: '✨', url: '/api/proxy?url=' },
   { id: 'custom', name: 'Custom Tunnel Node', ping: 'N/A', load: 'N/A', icon: '🛡️', url: '' },
 ];
 
@@ -25,7 +25,7 @@ export default function Tunnel() {
   });
 
   useEffect(() => {
-    fetch('https://ipapi.co/json/')
+    fetch('/api/location')
       .then(res => res.json())
       .then(data => setIpData({ ip: data.ip, location: `${data.city}, ${data.country_name}` }))
       .catch(() => setIpData({ ip: '8.8.8.8', location: 'Mountain View, US' }));
@@ -55,7 +55,7 @@ export default function Tunnel() {
         navigator.serviceWorker.controller.postMessage({ type: 'TUNNEL_STATE', active: false });
       }
 
-      fetch('https://ipapi.co/json/')
+      fetch('/api/location')
         .then(res => res.json())
         .then(data => setIpData({ ip: data.ip, location: `${data.city}, ${data.country_name}` }));
     } else {

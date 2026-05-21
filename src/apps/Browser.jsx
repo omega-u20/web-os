@@ -29,9 +29,9 @@ export default function Browser() {
   }, [isTunnelActive]);
 
   const engines = {
-    standard: 'https://shuttle.rip/main/',
-    stealth: 'https://api.allorigins.win/raw?url=',
-    ultra: 'https://t.student-portal.workers.dev/main/',
+    standard: '/api/proxy?url=',
+    stealth: '/api/proxy?url=',
+    ultra: '/api/proxy?url=',
   };
 
   const isUrl = (str) => {
@@ -68,12 +68,7 @@ export default function Browser() {
 
     if (tunnelActive || needsProxy) {
       const base = proxyBase || engines[engine] || engines.stealth;
-      proxyUrl = base.endsWith('/') ? `${base}${finalTarget}` : `${base}/${finalTarget}`;
-      
-      // Special case for Google Search with IGU
-      if (finalTarget.includes('google.com/search?igu=1')) {
-        proxyUrl = finalTarget; // Google with IGU doesn't need a proxy to be in a frame!
-      }
+      proxyUrl = base.endsWith('/') ? `${base}${finalTarget}` : `${base}${finalTarget}`;
     } else {
       proxyUrl = finalTarget;
     }
