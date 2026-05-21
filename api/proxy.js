@@ -16,7 +16,18 @@ export default async function handler(req, res) {
     fetchRes.headers.forEach((val, key) => {
       const lowerKey = key.toLowerCase();
       // Remove headers that prevent iframe embedding or cross-origin access
-      if (!['x-frame-options', 'content-security-policy', 'content-security-policy-report-only', 'clear-site-data', 'cross-origin-opener-policy'].includes(lowerKey)) {
+      // Also remove content-encoding/length since we modify the body and Node fetch auto-decompresses
+      const stripHeaders = [
+        'x-frame-options', 
+        'content-security-policy', 
+        'content-security-policy-report-only', 
+        'clear-site-data', 
+        'cross-origin-opener-policy',
+        'content-encoding',
+        'content-length',
+        'transfer-encoding'
+      ];
+      if (!stripHeaders.includes(lowerKey)) {
         res.setHeader(key, val);
       }
     });
