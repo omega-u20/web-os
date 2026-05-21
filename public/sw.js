@@ -27,24 +27,37 @@ self.addEventListener('fetch', (event) => {
   // 1. Never proxy internal assets or the OS itself
   if (url.origin.includes(location.origin)) return;
 
-  // 2. Never proxy the proxy engines themselves (avoids infinite OS recursion)
-  const isProxyNode = url.hostname.includes('shuttle.rip') || 
-                      url.hostname.includes('nebula.rip') || 
-                      url.hostname.includes('interstellar.rip');
-  
-  if (isProxyNode) return;
+  // 2. Recursion Guard: If we're already routing this specific request, don't double-proxy
+  if (url.href.includes('stunnel-proxy=true')) return;
 
   // 3. Only proxy external requests if tunnel is active
   if (tunnelActive && proxyUrl) {
-    console.log(`[Tunnel Server] Routing: ${url.href}`);
-    
-    const finalProxyUrl = proxyUrl.endsWith('/') ? `${proxyUrl}${url.href}` : `${proxyUrl}/${url.href}`;
+    const separator = proxyUrl.includes('?') ? '&' : '?';
+    const finalProxyUrl = proxyUrl.endsWith('/') 
+      ? `${proxyUrl}${url.href}${separator}stunnel-proxy=true` 
+      : `${proxyUrl}/${url.href}${separator}stunnel-proxy=true`;
     
     event.respondWith(
       fetch(finalProxyUrl, {
         method: event.request.method,
         headers: event.request.headers,
         mode: 'cors'
+      }).then(response => {
+        // Strip security headers that block iframes
+        const newHeaders = new Headers(response.headers);
+        
+        // Remove ALL possible frame-blocking headers
+        newHeaders.delete('X-Frame-Options');
+        newHeaders.delete('Content-Security-Policy');
+        newHeaders.delete('Content-Security-Policy-Report-Only');
+        newHeaders.set('Access-Control-Allow-Origin', '*');
+        
+        // Some sites use frame-ancestors in CSP, we already deleted CSP but just in case
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: newHeaders
+        });
       }).catch(err => {
         console.error('[Tunnel Server] Routing Error:', err);
         return fetch(event.request); 
